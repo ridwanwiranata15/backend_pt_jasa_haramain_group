@@ -1,0 +1,39 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('handling_hotels', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('service_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->string('nama')->nullable();
+            $table->date('tanggal')->nullable();
+            $table->string('harga')->nullable();
+            $table->string('pax')->nullable();
+            $table->enum('status', ['nego', 'deal', 'batal', 'tahap persiapan', 'tahap produksi', 'done'])->default('nego');
+            $table->string('supplier')->nullable();
+            $table->string('harga_dasar')->nullable();
+            $table->string('harga_jual')->nullable();
+            $table->string('kode_booking');
+            $table->string('rumlis');
+            $table->string('identitas_koper');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('handling_hotels');
+    }
+};
