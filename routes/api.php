@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -21,4 +22,5 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/roles/all', [\App\Http\Controllers\RoleController::class, 'all']);
     Route::apiResource('/roles', App\Http\Controllers\RoleController::class);
     Route::apiResource('/users', App\Http\Controllers\UserController::class);
+    Route::apiResource('/customers', CustomerController::class);
 });

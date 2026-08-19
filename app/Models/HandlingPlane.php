@@ -9,16 +9,16 @@ class HandlingPlane extends Model
 {
     protected $fillable = [
         "service_id",
-        "nama",
-        "tanggal",
+        "nama_bandara",
+        "jumlah_jamaah",
         "harga",
-        "pax",
+        "kedatangan_jamaah",
         "status",
         "supplier",
         "harga_dasar",
         "harga_jual",
-        "kode_booking",
-        "rumlis",
+        "paket_info",
+        "nama_supir",
         "identitas_koper"
     ];
 

@@ -2,17 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\HandlingHotelRequest;
+use App\Http\Services\HandlingHotelService;
 use App\Models\HandlingHotel;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class HandlingHotelController extends Controller
+class HandlingHotelController extends Controller implements HasMiddleware
 {
+     public static function middleware(): array
+    {
+        return [
+            new Middleware(['permission:handling_hotels.index'], only: ['index']),
+            new Middleware(['permission:handling_hotels.create'], only: ['store']),
+            new Middleware(['permission:handling_hotels.edit'], only: ['update']),
+            new Middleware(['permission:handling_hotels.delete'], only: ['destroy']),
+        ];
+    }
+    private $HandlingHotelService;
+
+    public function __construct(HandlingHotelService $HandlingHotelService)
+    {
+        $this->HandlingHotelService = $HandlingHotelService;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        return $this->HandlingHotelService->all();
     }
 
     /**
@@ -26,15 +45,15 @@ class HandlingHotelController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(HandlingHotelRequest $request)
     {
-        //
+        return $this->HandlingHotelService->create($request->validated());
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(HandlingHotel $handlingHotel)
+    public function show(HandlingHotel $HandlingHotel)
     {
         //
     }
@@ -42,7 +61,7 @@ class HandlingHotelController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(HandlingHotel $handlingHotel)
+    public function edit(HandlingHotel $HandlingHotel)
     {
         //
     }
@@ -50,16 +69,16 @@ class HandlingHotelController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, HandlingHotel $handlingHotel)
+    public function update(HandlingHotelRequest $request, int $id)
     {
-        //
+        return $this->HandlingHotelService->update($id, $request->validated());
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(HandlingHotel $handlingHotel)
+    public function destroy(int $id)
     {
-        //
+        return $this->HandlingHotelService->delete($id);
     }
 }

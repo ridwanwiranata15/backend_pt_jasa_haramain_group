@@ -2,17 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CustomerRequest;
+use App\Http\Services\CustomerService;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class CustomerController extends Controller
+class CustomerController extends Controller implements HasMiddleware
 {
+     public static function middleware(): array
+    {
+        return [
+            new Middleware(['permission:customers.index'], only: ['index']),
+            new Middleware(['permission:customers.create'], only: ['store']),
+            new Middleware(['permission:customers.edit'], only: ['update']),
+            new Middleware(['permission:customers.delete'], only: ['destroy']),
+        ];
+    }
+    private $customerService;
+
+    public function __construct(CustomerService $customerService)
+    {
+        $this->customerService = $customerService;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        return $this->customerService->all();
     }
 
     /**
@@ -26,9 +45,9 @@ class CustomerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CustomerRequest $request)
     {
-        //
+        return $this->customerService->create($request->validated());
     }
 
     /**
@@ -50,16 +69,16 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Customer $customer)
+    public function update(CustomerRequest $request, int $id)
     {
-        //
+        return $this->customerService->update($id, $request->validated());
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Customer $customer)
+    public function destroy(int $id)
     {
-        //
+        return $this->customerService->delete($id);
     }
 }
