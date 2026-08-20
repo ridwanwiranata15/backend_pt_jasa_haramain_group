@@ -2,22 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserRequest;
+use App\Http\Services\UserService;
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Resources\UserResource;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
 class UserController extends Controller implements HasMiddleware
 {
-    /**
-     * middleware
-     *
-     * @return array
-     */
-    public static function middleware(): array
+     public static function middleware(): array
     {
         return [
             new Middleware(['permission:users.index'], only: ['index']),
@@ -25,147 +19,66 @@ class UserController extends Controller implements HasMiddleware
             new Middleware(['permission:users.edit'], only: ['update']),
             new Middleware(['permission:users.delete'], only: ['destroy']),
         ];
-    } 
+    }
+    private $UserService;
 
+    public function __construct(UserService $UserService)
+    {
+        $this->UserService = $UserService;
+    }
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        //get users
-        $users = User::when(request()->search, function($users) {
-            $users = $users->where('name', 'like', '%'. request()->search . '%');
-        })->with('roles')->latest()->paginate(5);
+        return $this->UserService->all();
+    }
 
-        //append query string to pagination links
-        $users->appends(['search' => request()->search]);
-        
-        //return with Api Resource
-        return new UserResource(true, 'List Data Users', $users);
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(UserRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name'     => 'required',
-            'email'    => 'required|unique:users',
-            'password' => 'required|confirmed' 
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        //create user
-        $user = User::create([
-            'name'      => $request->name,
-            'email'     => $request->email,
-            'password'  => bcrypt($request->password)
-        ]);
-
-        //assign roles to user
-        $user->assignRole($request->roles);
-
-        if($user) {
-            //return success with Api Resource
-            return new UserResource(true, 'Data User Berhasil Disimpan!', $user);
-        }
-
-        //return failed with Api Resource
-        return new UserResource(false, 'Data User Gagal Disimpan!', null);
+        return $this->UserService->create($request->validated());
     }
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(User $User)
     {
-        $user = User::with('roles')->whereId($id)->first();
-        
-        if($user) {
-            //return success with Api Resource
-            return new UserResource(true, 'Detail Data User!', $user);
-        }
+        //
+    }
 
-        //return failed with Api Resource
-        return new UserResource(false, 'Detail Data User Tidak DItemukan!', null);
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(User $User)
+    {
+        //
     }
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(UserRequest $request, int $id)
     {
-        $validator = Validator::make($request->all(), [
-            'name'     => 'required',
-            'email'    => 'required|unique:users,email,'.$user->id,
-            'password' => 'confirmed'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        if($request->password == "") {
-
-            //update user without password
-            $user->update([
-                'name'      => $request->name,
-                'email'     => $request->email,
-            ]);
-
-        } else {
-
-            //update user with new password
-            $user->update([
-                'name'      => $request->name,
-                'email'     => $request->email,
-                'password'  => bcrypt($request->password)
-            ]);
-
-        }
-
-        //assign roles to user
-        $user->syncRoles($request->roles);
-
-        if($user) {
-            //return success with Api Resource
-            return new UserResource(true, 'Data User Berhasil Diupdate!', $user);
-        }
-
-        //return failed with Api Resource
-        return new UserResource(false, 'Data User Gagal Diupdate!', null);
+        return $this->UserService->update($id, $request->validated());
     }
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user)
+    public function destroy(int $id)
     {
-        if($user->delete()) {
-            //return success with Api Resource
-            return new UserResource(true, 'Data User Berhasil Dihapus!', null);
-        }
-
-        //return failed with Api Resource
-        return new UserResource(false, 'Data User Gagal Dihapus!', null);
+        return $this->UserService->delete($id);
     }
 }

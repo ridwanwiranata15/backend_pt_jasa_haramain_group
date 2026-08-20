@@ -3,6 +3,8 @@ namespace App\Http\Services;
 
 use App\Http\Repositories\OrderRepository;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
+
 
 class OrderService{
     private $OrderRepository;
@@ -36,6 +38,7 @@ class OrderService{
         if(isset($data['bukti_pembayaran']) && $data['bukti_pembayaran'] instanceof UploadedFile){
             $data['bukti_pembayaran'] = $this->bukti_pembayaran($data['bukti_pembayaran']);
         }
+        $data['invoice'] = 'INV-' . Str::random(10);
         return $this->OrderRepository->create($data);
     }
 

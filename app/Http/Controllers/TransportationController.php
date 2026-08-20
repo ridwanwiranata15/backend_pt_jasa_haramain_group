@@ -2,17 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TransportationRequest;
+use App\Http\Services\TransportationService;
 use App\Models\Transportation;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class TransportationController extends Controller
+class TransportationController extends Controller implements HasMiddleware
 {
+     public static function middleware(): array
+    {
+        return [
+            new Middleware(['permission:transportations.index'], only: ['index']),
+            new Middleware(['permission:transportations.create'], only: ['store']),
+            new Middleware(['permission:transportations.edit'], only: ['update']),
+            new Middleware(['permission:transportations.delete'], only: ['destroy']),
+        ];
+    }
+    private $TransportationService;
+
+    public function __construct(TransportationService $TransportationService)
+    {
+        $this->TransportationService = $TransportationService;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        return $this->TransportationService->all();
     }
 
     /**
@@ -26,15 +45,15 @@ class TransportationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(TransportationRequest $request)
     {
-        //
+        return $this->TransportationService->create($request->validated());
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Transportation $transportation)
+    public function show(Transportation $Transportation)
     {
         //
     }
@@ -42,7 +61,7 @@ class TransportationController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Transportation $transportation)
+    public function edit(Transportation $Transportation)
     {
         //
     }
@@ -50,16 +69,16 @@ class TransportationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Transportation $transportation)
+    public function update(TransportationRequest $request, int $id)
     {
-        //
+        return $this->TransportationService->update($id, $request->validated());
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Transportation $transportation)
+    public function destroy(int $id)
     {
-        //
+        return $this->TransportationService->delete($id);
     }
 }

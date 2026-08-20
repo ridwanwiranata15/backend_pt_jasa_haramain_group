@@ -2,17 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TypeHotelRequest;
+use App\Http\Services\TypeHotelService;
 use App\Models\TypeHotel;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class TypeHotelController extends Controller
+class TypeHotelController extends Controller implements HasMiddleware
 {
+     public static function middleware(): array
+    {
+        return [
+            new Middleware(['permission:type_hotels.index'], only: ['index']),
+            new Middleware(['permission:type_hotels.create'], only: ['store']),
+            new Middleware(['permission:type_hotels.edit'], only: ['update']),
+            new Middleware(['permission:type_hotels.delete'], only: ['destroy']),
+        ];
+    }
+    private $TypeHotelService;
+
+    public function __construct(TypeHotelService $TypeHotelService)
+    {
+        $this->TypeHotelService = $TypeHotelService;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        return $this->TypeHotelService->all();
     }
 
     /**
@@ -26,15 +45,15 @@ class TypeHotelController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(TypeHotelRequest $request)
     {
-        //
+        return $this->TypeHotelService->create($request->validated());
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(TypeHotel $typeHotel)
+    public function show(TypeHotel $TypeHotel)
     {
         //
     }
@@ -42,7 +61,7 @@ class TypeHotelController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(TypeHotel $typeHotel)
+    public function edit(TypeHotel $TypeHotel)
     {
         //
     }
@@ -50,16 +69,16 @@ class TypeHotelController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, TypeHotel $typeHotel)
+    public function update(TypeHotelRequest $request, int $id)
     {
-        //
+        return $this->TypeHotelService->update($id, $request->validated());
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TypeHotel $typeHotel)
+    public function destroy(int $id)
     {
-        //
+        return $this->TypeHotelService->delete($id);
     }
 }
